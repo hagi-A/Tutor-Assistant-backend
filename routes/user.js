@@ -2,8 +2,13 @@ const express = require('express')
 // const requireRole = require('../middleware/requireRole');
 
 //controller functions
-const { signupUser, loginUser } = require('../controller/userController')
-// const requireAuth = require('../middleware/requireAuth')
+const {
+  signupUser,
+  loginUser,
+  searchUserUsernames,
+  allUsers,
+} = require("../controller/userController");
+const {requireAuth} = require('../middleware/requireAuth')
 
 const router = express.Router()
 
@@ -12,10 +17,13 @@ const router = express.Router()
 
 
 //login route
+router.route("/").get(requireAuth, allUsers);
 router.post('/login', loginUser)
 
 //signup route
 router.post('/signup', signupUser)
+
+router.get('/search', searchUserUsernames);
 
 // // Protected routes using requireRole middleware
 // router.get('/admin', requireRole('Admin'), (req, res) => {

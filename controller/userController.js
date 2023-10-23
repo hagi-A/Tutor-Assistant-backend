@@ -1,4 +1,5 @@
 const User = require('../models/userModel')
+const asyncHandler = require("express-async-handler");
 const jwt = require('jsonwebtoken')
 
 const createToken = (_id, selectedRole) => {
@@ -39,8 +40,34 @@ const signupUser = async (req, res) => {
     
 }
 
+const searchUserUsernames = async (req, res) => {
+    const query = req.query.q; // Get the search query from the request query
+  
+    try {
+      const results = await User.find({ username: new RegExp(query, 'i') });
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ error: 'An error occurred while searching for usernames.' });
+    }
+  };
+
+const allUsers = async (req, res) => {
+    const keyword = req.query.search
+      ? {
+          $or: [
+            { username: { $regex: req.query.search, $options: "i" } },
+            { email: { $regex: req.query.search, $options: "i" } },
+          ],
+        }
+      : {};
+
+   const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
+   res.send(users);
+};
 
 module.exports = {
-    signupUser,
-    loginUser
-}
+  signupUser,
+  loginUser,
+  searchUserUsernames,
+  allUsers,
+};

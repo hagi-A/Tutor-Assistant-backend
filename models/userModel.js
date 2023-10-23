@@ -7,12 +7,12 @@ const Schema = mongoose.Schema
 const userSchema = new Schema({
   username: {
     type: String,
-    required: true
-  }, 
+    required: true,
+  },
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   age: {
     type: Number,
@@ -20,14 +20,16 @@ const userSchema = new Schema({
   },
   password: {
     type: String,
-    required: true
+    required: true,
   },
   selectedRole: {
     type: String,
-    enum: ['Parent', 'Student', 'Tutor', 'Admin', 'Supervisor'],
+    enum: ["Parent", "Student", "Tutor", "Admin", "Supervisor"],
     required: true,
   },
-})
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
+});
 
 // static signup method
 userSchema.statics.signup = async function(username, email, birthdate, password, selectedRole) {
@@ -91,5 +93,32 @@ userSchema.statics.login = async function(username, email, password) {
   }
   return user
 }
+
+// Extend the User model with custom methods
+userSchema.methods.generateRandomPassword = function (length) {
+  const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+  let password = "";
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+  return password;
+};
+
+userSchema.methods.updateUserPasswordAndToken = async function (newPassword, token, expiration) {
+  try {
+    // Hash and update the user's password in the database
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(newPassword, salt);
+
+    // Update the reset password token and expiration time
+    this.resetPasswordToken = token;
+    this.resetPasswordExpires = expiration;
+
+    await this.save();
+  } catch (error) {
+    throw error;
+  }
+};
 
 module.exports = mongoose.model('User', userSchema)
