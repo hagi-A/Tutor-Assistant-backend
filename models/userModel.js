@@ -2,12 +2,22 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const validator = require('validator')
 
+const mongoosePaginate = require("mongoose-paginate-v2");
+
 const Schema = mongoose.Schema
 
 const userSchema = new Schema({
-  username: {
+  firstName: {
     type: String,
     required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
+  },
+  username: {
+    type: String,
+    // default: null, // Set the default value to null
   },
   email: {
     type: String,
@@ -27,51 +37,100 @@ const userSchema = new Schema({
     enum: ["Parent", "Student", "Tutor", "Admin", "Supervisor"],
     required: true,
   },
+  token: {
+    //added
+    type: String,
+  },
+  status: {
+    type: Number,
+    required: true,
+    enum: [0, 1, 2], // 0: Denied, 1: Accepted, 2: Unauthorized
+  },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
 });
 
 // static signup method
-userSchema.statics.signup = async function(username, email, birthdate, password, selectedRole) {
-
-    // validation
-  if  (!username || !email || !birthdate || !password || !selectedRole) {
-    throw Error('All fields must be filled')
+userSchema.statics.signup = async function (
+  firstName,
+  lastName,
+  username,
+  email,
+  birthdate,
+  password,
+  selectedRole
+) {
+  // Validation
+  if (!firstName) {
+    throw Error("Please enter your First Name");
+  }
+  if (!lastName) {
+    throw Error("Please enter your last name");
+  }
+  if (!email 
+  ) {
+    throw Error("Please Enter your email");
+  }
+  if (
+    !birthdate
+  ) {
+    throw Error("Please select your birthday");
+  }
+  if (!password) {
+    throw Error("Please enter a valid password");
+  }
+  if (!selectedRole) {
+    console.log(selectedRole)
+    throw Error("Select your role");
   }
 
   if (!validator.isEmail(email)) {
-    throw Error('Email is not valid')
+    throw Error("Email is not valid");
   }
 
   if (!validator.isStrongPassword(password)) {
-    throw Error('password not strong enough')
+    throw Error("Password not strong enough");
   }
-  const exist = await this.findOne({ username })
+
+  const exist = await this.findOne({ email });
 
   if (exist) {
-    throw Error('username already in use')
+    throw Error("Email already in use");
   }
-  const exists = await this.findOne({ email })
 
-  if (exists) {
-    throw Error('Email already in use')
-  }
   const birthYear = new Date(birthdate).getFullYear();
   const currentYear = new Date().getFullYear();
   const age = currentYear - birthYear;
 
   if (age < 12) {
-    throw Error('User is too young to register');
+    throw Error("User is too young to register");
   }
 
-  const salt = await bcrypt.genSalt(10)
-  const hash = await bcrypt.hash(password, salt)
-  
+  const salt = await bcrypt.genSalt(10);
+  const hash = await bcrypt.hash(password, salt);
 
-  const user = await this.create({username, email, age, password: hash, selectedRole })
+  let defaultStatus = 1; // Default to unauthorized
 
-  return user
-}
+  if (selectedRole === "Parent" || selectedRole === "Student") {
+    defaultStatus = 1; // Set to accepted for Parent and Student
+  } else if (selectedRole === "Tutor") {
+    defaultStatus = 0; // Set to denied for Tutor
+  }
+
+  const user = await this.create({
+    firstName,
+    lastName,
+    username,
+    email,
+    age,
+    password: hash,
+    selectedRole,
+    status: defaultStatus,
+  });
+
+  return user;
+};
+
 
 //static login method
 
@@ -121,4 +180,8 @@ userSchema.methods.updateUserPasswordAndToken = async function (newPassword, tok
   }
 };
 
-module.exports = mongoose.model('User', userSchema)
+userSchema.plugin(mongoosePaginate);
+
+const User = mongoose.model('User', userSchema)
+
+module.exports = User;

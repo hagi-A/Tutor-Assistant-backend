@@ -8,29 +8,99 @@ const mongoose = require('mongoose')
 const tutorRoutes = require('./routes/tutorRoutes');
 const jwt = require("jsonwebtoken");
 // const webinarRoutes = require('./routes/webinars')
-const userRoutes = require('./routes/user')
+const user = require('./routes/user')
 const chatRoutes = require("./routes/chatRoutes");
-const passwordRoutes = require('./routes/passwordRoute');
+// const passwordRoutes = require('./routes/passwordRoute');
 const nodemailer = require("nodemailer");
 const User = require('./models/userModel')
-
+const conversationRoutes = require("./routes/conversationRoutes");
+const messageRoutes = require("./routes/messageRoutes");
+const fileRoutes = require("./routes/fileRoutes");
+const io = require("socket.io")({
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
 // express app
-const app = express()
+const app = express();
 
 // middleware
-app.use(express.json())
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 // Enable CORS for all routes
-app.use(cors({ origin: 'http://localhost:3000' }));
-
+app.use(cors({ origin: "http://127.0.0.1:3000" }));
+// 
 
 app.use((req, res, next) => {
   console.log(req.path, req.method)
   next()
-})
+});
 
-app.use('/api/user', userRoutes)
+// Socket.io
+let users = [];
+io.on('connection', socket => {
+    console.log('User connected', socket.id);
+    socket.on('addUser', userId => {
+        const isUserExist = users.find(user => user.userId === userId);
+        if (!isUserExist) {
+            const user = { userId, socketId: socket.id };
+            users.push(user);
+            io.emit('getUsers', users);
+        }
+    });
+
+    socket.on('sendMessage', async ({ senderId, receiverId, message, conversationId }) => {
+        const receiver = users.find(user => user.userId === receiverId);
+        const sender = users.find(user => user.userId === senderId);
+        const user = await User.findById(senderId);
+        console.log('sender :>> ', sender, receiver);
+        if (receiver) {
+            io.to(receiver.socketId)
+              .to(sender.socketId)
+              .emit("getMessage", {
+                senderId,
+                message,
+                conversationId,
+                receiverId,
+                user: {
+                  id: user._id,
+                  username: user.username,
+                  email: user.email,
+                },
+              });
+            }else {
+                io.to(sender.socketId).emit("getMessage", {
+                  senderId,
+                  message,
+                  conversationId,
+                  receiverId,
+                  user: {
+                    id: user._id,
+                    username: user.username,
+                    email: user.email,
+                  },
+                });
+            }
+        });
+
+    socket.on('disconnect', () => {
+        users = users.filter(user => user.socketId !== socket.id);
+        io.emit('getUsers', users);
+    });
+    // io.emit('getUsers', socket.userId);
+});
+
+
+app.use('/api/user', user)
 app.use('/uploads', express.static('uploads')); // Serve uploaded files
 app.use('/api/tutors', tutorRoutes); // Use the tutor registration route
+// app.use("/api/chat", chatRoutes);
+
+// Use the conversation routes
+app.use("/api/conversation", conversationRoutes);
+// Use the message routes
+app.use("/api/message", messageRoutes);
+app.use("/api/files", fileRoutes);
 
 // app.use('/api/forgotPassword', passwordRoutes); // You can choose your route prefix
 app.post('/forgotPassword', (req, res) => {

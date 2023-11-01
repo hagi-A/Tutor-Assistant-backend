@@ -1,14 +1,16 @@
 const express = require('express')
 // const requireRole = require('../middleware/requireRole');
-
+const {protect} = require('../middleware/authMiddleware')
 //controller functions
 const {
   signupUser,
   loginUser,
-  searchUserUsernames,
-  allUsers,
+  getUsersExceptUserId,
+  // allUsers,
+  // // searchUserUsernames,
+  // searchUsers,
 } = require("../controller/userController");
-const {requireAuth} = require('../middleware/requireAuth')
+// const {requireAuth} = require('../middleware/requireAuth')
 
 const router = express.Router()
 
@@ -17,13 +19,17 @@ const router = express.Router()
 
 
 //login route
-router.route("/").get(requireAuth, allUsers);
+// router.route("/").get(protect, allUsers);
 router.post('/login', loginUser)
 
 //signup route
 router.post('/signup', signupUser)
-
-router.get('/search', searchUserUsernames);
+// Get users except the specified user by user ID route
+router.get("/:userId", getUsersExceptUserId);
+// router.get("/users/search", userController.searchUsers);
+// router.get('/search', searchUserUsernames);
+// router.get("/allUsers", tutorController.getAllTutors);
+// router.get("/users/search", tutorController.searchTutors);
 
 // // Protected routes using requireRole middleware
 // router.get('/admin', requireRole('Admin'), (req, res) => {

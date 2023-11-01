@@ -1,18 +1,28 @@
 const mongoose = require('mongoose')
 
+const mongoosePaginate = require("mongoose-paginate-v2");
+
 const Schema = mongoose.Schema
 
 const tutorSchema = new Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // 'User' should match the model name of your User schema
-    required: true,
-  },
-  fullname: {
+  firstName: {
     type: String,
     required: true,
   },
+  lastName: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   profession: {
+    type: String,
+    required: true,
+  },
+  location: {
     type: String,
     required: true,
   },
@@ -20,9 +30,14 @@ const tutorSchema = new Schema({
     type: String,
     required: true,
   },
-  location: {
-    type: String,
-    required: true,
+  ueeeResult: {
+    type: Number, // or Number, depending on your data
+  },
+  majorTaken: {
+    type: Number,
+  },
+  cgpa: {
+    type: Number, // or Number, depending on your data
   },
   priceRate: {
     type: Number,
@@ -39,15 +54,11 @@ const tutorSchema = new Schema({
       "College",
     ],
   },
-  courses: {
+  selectedCVs: {
     type: String,
     required: true,
   },
-  cvPath: {
-    type: String,
-    required: true,
-  },
-  certificateImages: [
+  selectedImages: [
     {
       type: String,
       required: true,
@@ -55,6 +66,13 @@ const tutorSchema = new Schema({
   ],
 });
 
-const Tutor = mongoose.model('Tutor', tutorSchema);
+// tutorSchema.plugin(mongoosePaginate);
 
+const Tutor = mongoose.model('Tutor', tutorSchema);
+// Tutor.paginate().then({}); //usage
 module.exports = Tutor;
+ // user: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: "User", // 'User' should match the model name of your User schema
+  //   required: true,
+  // },
