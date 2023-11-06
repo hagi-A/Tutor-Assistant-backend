@@ -21,6 +21,11 @@ const tutorSchema = new Schema({
   profession: {
     type: String,
     required: true,
+    enum: [
+      "teacher",
+      "student",
+      "other",
+    ],
   },
   location: {
     type: String,
@@ -34,7 +39,7 @@ const tutorSchema = new Schema({
     type: Number, // or Number, depending on your data
   },
   majorTaken: {
-    type: Number,
+    type: String,
   },
   cgpa: {
     type: Number, // or Number, depending on your data
@@ -58,12 +63,10 @@ const tutorSchema = new Schema({
     type: String,
     required: true,
   },
-  selectedImages: [
-    {
-      type: String,
-      required: true,
-    },
-  ],
+  selectedImages: {
+    type: String,
+    required: true,
+  },
 });
 
 // tutorSchema.plugin(mongoosePaginate);

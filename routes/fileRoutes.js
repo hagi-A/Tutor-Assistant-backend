@@ -11,8 +11,8 @@ const uploadImg = multer({ dest: "files/" });
 router.post(
   "/images",
   uploadImg.fields([
-    { name: "image", maxCount: 1 },
-    { name: "cvs", maxCount: 1 },
+    { name: "selectedImages", maxCount: 3 },
+    { name: "selectedCVs", maxCount: 8 },
   ]),
   imageUpload
 );

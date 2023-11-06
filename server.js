@@ -16,19 +16,27 @@ const User = require('./models/userModel')
 const conversationRoutes = require("./routes/conversationRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const fileRoutes = require("./routes/fileRoutes");
-const io = require("socket.io")({
-  cors: {
-    origin: "http://localhost:3000",
-  },
-});
+// const io = require("socket.io")({
+//   cors: {
+//     origin: "http://localhost:3000",
+//   },
+// });
 // express app
 const app = express();
+const allowedOrigins = [
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
+  // Add more origins as needed
+];
 
+const corsOptions = {
+  origin: allowedOrigins,
+};
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // Enable CORS for all routes
-app.use(cors({ origin: "http://127.0.0.1:3000" }));
+app.use(cors(corsOptions));
 // 
 
 app.use((req, res, next) => {
@@ -37,58 +45,58 @@ app.use((req, res, next) => {
 });
 
 // Socket.io
-let users = [];
-io.on('connection', socket => {
-    console.log('User connected', socket.id);
-    socket.on('addUser', userId => {
-        const isUserExist = users.find(user => user.userId === userId);
-        if (!isUserExist) {
-            const user = { userId, socketId: socket.id };
-            users.push(user);
-            io.emit('getUsers', users);
-        }
-    });
+// let users = [];
+// io.on('connection', socket => {
+//     console.log('User connected', socket.id);
+//     socket.on('addUser', userId => {
+//         const isUserExist = users.find(user => user.userId === userId);
+//         if (!isUserExist) {
+//             const user = { userId, socketId: socket.id };
+//             users.push(user);
+//             io.emit('getUsers', users);
+//         }
+//     });
 
-    socket.on('sendMessage', async ({ senderId, receiverId, message, conversationId }) => {
-        const receiver = users.find(user => user.userId === receiverId);
-        const sender = users.find(user => user.userId === senderId);
-        const user = await User.findById(senderId);
-        console.log('sender :>> ', sender, receiver);
-        if (receiver) {
-            io.to(receiver.socketId)
-              .to(sender.socketId)
-              .emit("getMessage", {
-                senderId,
-                message,
-                conversationId,
-                receiverId,
-                user: {
-                  id: user._id,
-                  username: user.username,
-                  email: user.email,
-                },
-              });
-            }else {
-                io.to(sender.socketId).emit("getMessage", {
-                  senderId,
-                  message,
-                  conversationId,
-                  receiverId,
-                  user: {
-                    id: user._id,
-                    username: user.username,
-                    email: user.email,
-                  },
-                });
-            }
-        });
+//     socket.on('sendMessage', async ({ senderId, receiverId, message, conversationId }) => {
+//         const receiver = users.find(user => user.userId === receiverId);
+//         const sender = users.find(user => user.userId === senderId);
+//         const user = await User.findById(senderId);
+//         console.log('sender :>> ', sender, receiver);
+//         if (receiver) {
+//             io.to(receiver.socketId)
+//               .to(sender.socketId)
+//               .emit("getMessage", {
+//                 senderId,
+//                 message,
+//                 conversationId,
+//                 receiverId,
+//                 user: {
+//                   id: user._id,
+//                   username: user.username,
+//                   email: user.email,
+//                 },
+//               });
+//             }else {
+//                 io.to(sender.socketId).emit("getMessage", {
+//                   senderId,
+//                   message,
+//                   conversationId,
+//                   receiverId,
+//                   user: {
+//                     id: user._id,
+//                     username: user.username,
+//                     email: user.email,
+//                   },
+//                 });
+//             }
+//         });
 
-    socket.on('disconnect', () => {
-        users = users.filter(user => user.socketId !== socket.id);
-        io.emit('getUsers', users);
-    });
-    // io.emit('getUsers', socket.userId);
-});
+//     socket.on('disconnect', () => {
+//         users = users.filter(user => user.socketId !== socket.id);
+//         io.emit('getUsers', users);
+//     });
+//     // io.emit('getUsers', socket.userId);
+// });
 
 
 app.use('/api/user', user)
@@ -97,7 +105,7 @@ app.use('/api/tutors', tutorRoutes); // Use the tutor registration route
 // app.use("/api/chat", chatRoutes);
 
 // Use the conversation routes
-app.use("/api/conversation", conversationRoutes);
+// app.use("/api/conversation", conversationRoutes);
 // Use the message routes
 app.use("/api/message", messageRoutes);
 app.use("/api/files", fileRoutes);
