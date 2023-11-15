@@ -3,7 +3,9 @@ const router = express.Router();
 const multer = require("multer");
 const {
   imageUpload,
-  fetchImage
+  fetchImage,
+  // fetchCv,
+  // handleTutorAction,
 } = require("../controller/fileController");
 
 const uploadImg = multer({ dest: "files/" });
@@ -17,5 +19,9 @@ router.post(
   imageUpload
 );
 router.get("/images/:imageName", fetchImage);
+
+// router.get("/cvs/:cvName", fetchCv);
+// Route to handle tutor action
+// router.post('/tutors/:email/action', handleTutorAction);
 
 module.exports = router;

@@ -1,6 +1,10 @@
 const Tutor = require("../models/tutorModel");
 const multer = require("multer");
 const fs = require("fs");
+// const nodemailer = require('nodemailer');
+// const generateUsername = require('../helpers/usernameGenerator'); // Import the generateUsername function
+// const generatePassword = require('../helpers/passwordGenerator'); // Import the generatePassword function
+
 
 const imageUpload = async (req, res) => {
   const selectedImages = req.files.selectedImages[0].filename;
@@ -31,10 +35,8 @@ const imageUpload = async (req, res) => {
     const profession = formData.profession;
     const phoneNumber = formData.phoneNumber;
     const location = formData.location;
-    const ueeeResult = formData.ueeeResult;
     const majorTaken = formData.majorTaken;
-    const cgpa = formData.cgpa;
-    const priceRate = formData.price;
+    // const priceRate = formData.price;
     const gradeLevel = formData.gradeLevel;
     if (!formData.firstName) {
       console.log("firstname");
@@ -60,22 +62,14 @@ const imageUpload = async (req, res) => {
       console.log("phoneNumber");
       return res.send({ error: "Please Enter your Phone Number" });
     }
-    if (!formData.ueeeResult) {
-      console.log("ueeeResult");
-      return res.send({ error: "Please Enter your Result" });
-    }
     if (!formData.majorTaken) {
       console.log("majorTaken");
       return res.send({ error: "Please Enter your Major" });
     }
-    if (!formData.cgpa) {
-      console.log("cgpa");
-      return res.send({ error: "Please Enter your CGPA" });
-    }
-    if (!formData.price) {
-      console.log("price");
-      return res.send({ error: "Please Enter your Price Rate" });
-    }
+    // if (!formData.price) {
+    //   console.log("price");
+    //   return res.send({ error: "Please Enter your Price Rate" });
+    // }
     if (!formData.gradeLevel) {
       console.log("gradeLevel");
       return res.send({ error: "Please Select Grade Lavel" });
@@ -103,10 +97,8 @@ const imageUpload = async (req, res) => {
       profession,
       location,
       phoneNumber,
-      ueeeResult,
       majorTaken,
-      cgpa,
-      priceRate,
+      // priceRate,
       gradeLevel,
       selectedCVs,
       selectedImages,
@@ -130,13 +122,31 @@ const imageUpload = async (req, res) => {
 const fetchImage = async (req, res) => {
   // do a bunch of if statements to make sure the user is
   // authorized to view this image, then
-
-  const imageName = req.params.imageName;
-  const readStream = fs.createReadStream(`images/${imageName}`);
-  readStream.pipe(res);
+    // console.log(req.params);
+  // try {
+    const imageName = req.params.imageName;
+    const readStream = fs.createReadStream(`files/${imageName}`);
+    readStream.pipe(res);
+  // } catch (err) {
+  //   console.log(err);
+  // }
 };
+
+// const fetchCv = async (req, res) => {
+//   // do a bunch of if statements to make sure the user is
+//   // authorized to view this image, then
+
+//   const cvName = req.params.selectedCVs;
+//   const readStream = fs.createReadStream(`cvs/${cvName}`);
+//   readStream.pipe(res);
+// };
+
+
+
 
 module.exports = {
   imageUpload,
   fetchImage,
+  // fetchCv,
+  // handleTutorAction,
 };

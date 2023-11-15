@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
+const bcrypt = require("bcrypt");
+const validator = require("validator");
 
-const mongoosePaginate = require("mongoose-paginate-v2");
+
+// const mongoosePaginate = require("mongoose-paginate-v2");
 
 const Schema = mongoose.Schema
 
@@ -21,11 +24,7 @@ const tutorSchema = new Schema({
   profession: {
     type: String,
     required: true,
-    enum: [
-      "teacher",
-      "student",
-      "other",
-    ],
+    enum: ["teacher", "student", "other"],
   },
   location: {
     type: String,
@@ -35,30 +34,28 @@ const tutorSchema = new Schema({
     type: String,
     required: true,
   },
-  ueeeResult: {
-    type: Number, // or Number, depending on your data
-  },
   majorTaken: {
     type: String,
   },
-  cgpa: {
-    type: Number, // or Number, depending on your data
-  },
-  priceRate: {
-    type: Number,
-    required: true,
-  },
-  gradeLevel: {
-    type: String,
-    required: true,
-    enum: [
-      "Kindergarten",
-      "Elementary",
-      "Middle School",
-      "High School",
-      "College",
-    ],
-  },
+  // priceRate: {
+  //   type: Number,
+  //   required: true,
+  // },
+  gradeLevel: [
+    {
+      // name: String,
+      type: String,
+      // required: true,
+
+      // enum: [
+      //   "Kindergarten",
+      //   "Elementary",
+      //   "Middle School",
+      //   "High School",
+      //   "College",
+      // ],
+    },
+  ],
   selectedCVs: {
     type: String,
     required: true,
@@ -67,9 +64,51 @@ const tutorSchema = new Schema({
     type: String,
     required: true,
   },
+  status: {
+    type: String,
+    enum: ["Accepted", "Denied", "Pending"], // Assuming limited status options
+    default: "Pending", // Default status for a new tutor
+  },
+  username: {
+    type: String,
+    // default: null, // Set the default value to null
+  },
+  password: {
+    type: String,
+    // default: null, // Set the default value to null
+  },
+  selectedRole: {
+    type: String,
+    default: "Tutor",
+    // required: true,
+  },
+  rank: {
+    type: Number,
+    default: 0, // Set a default value if needed
+  },
 });
 
 // tutorSchema.plugin(mongoosePaginate);
+tutorSchema.statics.tutorlogin = async function (emailOrUsername, password) {
+  // if (!emailOrUsername || !password) {
+  //   throw Error("All fields must be filled");
+  // }
+
+  const tutor = await Tutor.findOne({
+    $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
+  });
+
+  if (!tutor) {
+    throw Error("Incorrect username or email");
+  }
+
+  const match = await bcrypt.compare(password, tutor.password);
+
+  if (!match) {
+    throw Error("incorect password");
+  }
+  return tutor;
+};
 
 const Tutor = mongoose.model('Tutor', tutorSchema);
 // Tutor.paginate().then({}); //usage

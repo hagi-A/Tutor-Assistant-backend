@@ -25,7 +25,8 @@ const sendEmail = async (email, username) => {
     from: process.env.EMAIL_USER,
     to: email,
     subject: "Username Information",
-    text: `Your generated username is: ${username}`,
+    text: `Your generated username is: ${username} `,
+
   };
 
   transporter.sendMail(mailOptions, function (error, info) {
@@ -39,16 +40,17 @@ const sendEmail = async (email, username) => {
 
 // login user
 const loginUser = async (req, res) => {
-    const {username, email, password} = req.body
+    const { emailOrUsername, password } = req.body;
 
     try{
-        const user = await User.login(username, email, password)
-         // create a token with user's _id and role
-         const selectedRole = user.selectedRole
-        const token = createToken({userId: user._id, role: user.selectedRole });
-        res.status(200).json({username, token, selectedRole})
-        
-        console.log(user)
+      // Find the user by email or username using the custom login method
+      const user = await User.login(emailOrUsername, password);
+      // create a token with user's _id and role
+      const selectedRole = user.selectedRole;
+      const token = createToken({ userId: user._id, role: user.selectedRole });
+      res.status(200).json({ emailOrUsername, token, selectedRole });
+
+      console.log(user);
     }catch (error) {
         res.status(400).json({error: error.message })
     } 
