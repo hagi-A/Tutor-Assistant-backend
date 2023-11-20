@@ -160,5 +160,33 @@ const denyTutorRequest = async (req, res) => {
     res.send({ message: error.message });
   }
 };
+// Update the function that handles rank changes
+const updateTutorProfile = async (req, res) => {
+  const { id } = req.params;
+  const { rank, gradeLevel } = req.body;
 
-module.exports = { acceptAction, denyTutorRequest, loginTutor };
+  try {
+    const updatedTutor = await Tutor.findByIdAndUpdate(
+      id,
+      { rank, gradeLevel },
+      { new: true }
+    );
+
+    if (!updatedTutor) {
+      return res.status(404).json({ message: "Tutor not found" });
+    }
+    // console.error(error);
+    res.json(updatedTutor);
+  } catch (error) {
+    console.error("Error updating rank and gradeLevels:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+module.exports = {
+  acceptAction,
+  denyTutorRequest,
+  loginTutor,
+  updateTutorProfile,
+};

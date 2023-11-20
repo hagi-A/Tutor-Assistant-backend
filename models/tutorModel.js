@@ -84,7 +84,9 @@ const tutorSchema = new Schema({
   },
   rank: {
     type: Number,
-    default: 0, // Set a default value if needed
+    min: 1,
+    max: 5,
+    default: 1, // You can set a default value if needed
   },
 });
 

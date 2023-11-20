@@ -5,6 +5,7 @@ const {
   denyTutorRequest,
   acceptAction,
   loginTutor,
+  updateTutorProfile,
 } = require("../controller/tutorController");
 
 // Define the tutor registration route
@@ -22,6 +23,8 @@ router.put('/tutor-requests/:id/deny', denyTutorRequest);
 router.put("/tutor-requests/:id/accept", acceptAction);
 
 router.post("/tutorlogin", loginTutor);
+// Route to update tutor rank
+router.put("/updateTutorProfile/:id", updateTutorProfile);
 // router.get("/allTutors", tutorController.getAllTutors);
 // router.get("/tutors/search", tutorController.searchTutors);
 
