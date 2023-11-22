@@ -1,4 +1,5 @@
 const Tutor = require("../models/tutorModel");
+const Blacklist = require("../models/blacklistModel");
 const nodemailer = require("nodemailer");
 const generateUsername = require("../helpers/usernameGenerator"); // Import the generateUsername function
 const generatePassword = require("../helpers/passwordGenerator"); // Import the generatePassword function
@@ -119,12 +120,21 @@ const acceptAction = async (req, res) => {
 const denyTutorRequest = async (req, res) => {
   try {
     const { id } = req.params;
+    const { denialReasons } = req.body;
 
     // Fetch details of the tutor to get the name and email before deleting
     const tutorDetails = await Tutor.findById(id);
+    // Update the status to "Blacklisted"
+    tutorDetails.status = "Blacklisted";
+    await tutorDetails.save();
+    // Create a Blacklist entry
+    const blacklistEntry = await Blacklist.create({
+      tutor: id,
+      denialReasons,
+    });
 
-    // Delete the tutor's data from the database
-    const deletedTutor = await Tutor.findByIdAndDelete(id);
+    // // Delete the tutor's data from the database
+    // const deletedTutor = await Tutor.findByIdAndDelete(id);
 
     if (tutorDetails) {
       const email = tutorDetails.email;
@@ -140,7 +150,11 @@ const denyTutorRequest = async (req, res) => {
         from: process.env.EMAIL_USER,
         to: email,
         subject: "Tutor Request Denied",
-        text: `Dear ${tutorDetails.firstName}, your tutor request has been denied.`,
+        text: `Dear ${
+          tutorDetails.firstName
+        }, your tutor request has been denied.\n\nDenial Reasons: Reasons: ${denialReasons.join(
+          ", "
+        )}`,
         // You can include more details or HTML for the email content
       };
 
@@ -155,7 +169,7 @@ const denyTutorRequest = async (req, res) => {
       console.log("Tutor details not found for sending email.");
     }
 
-    res.json(deletedTutor);
+    res.json({ success: true, blacklistEntry });
   } catch (error) {
     res.send({ message: error.message });
   }

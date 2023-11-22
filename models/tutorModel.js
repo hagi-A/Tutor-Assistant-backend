@@ -66,7 +66,7 @@ const tutorSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ["Accepted", "Denied", "Pending"], // Assuming limited status options
+    enum: ["Accepted", "Denied", "Pending", "Blacklisted"], // Assuming limited status options
     default: "Pending", // Default status for a new tutor
   },
   username: {
@@ -87,6 +87,10 @@ const tutorSchema = new Schema({
     min: 1,
     max: 5,
     default: 1, // You can set a default value if needed
+  },
+  isBlacklisted: {
+    type: Boolean,
+    default: false,
   },
 });
 
