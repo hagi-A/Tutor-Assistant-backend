@@ -19,7 +19,9 @@ const conversationRoutes = require("./routes/conversationRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const Tutor = require('./models/tutorModel');
+const course = require("./models/course");
 const supervisorRouter = require('./routes/supervisorRouter')
+const courseRoutes = require("./routes/courseRoutes");
 // const io = require("socket.io")({
 //   cors: {
 //     origin: "http://localhost:3000",
@@ -116,6 +118,25 @@ app.get("/getUsers", (req, res) => {
 app.get("/getTutors", (req, res) => {
   tutorModel
     .find()
+    .then((tutors) => res.json(tutors))
+    .catch((err) => res.json(err));
+});
+app.get("/getAcceptedTutors", (req, res) => {
+  tutorModel
+    .find({ status: "Accepted" }) // Filter by status "Accepted"
+    .sort({ rank: -1 }) // Sort by rank in descending order
+    .then((tutors) => res.json(tutors))
+    .catch((err) => res.json(err));
+});
+app.get("/getCourses", (req, res) => {
+  course
+    .find()
+    .then((courses) => res.json(courses))
+    .catch((err) => res.json(err));
+});
+app.get("/getStudents", (req, res) => {
+  userModel
+    .find({ selectedRole: "Student" }) // Filter by selectedRole
     .then((users) => res.json(users))
     .catch((err) => res.json(err));
 });
@@ -124,7 +145,8 @@ app.get("/getTutors", (req, res) => {
 // Use the message routes
 app.use("/api/message", messageRoutes);
 app.use("/api/files", fileRoutes);
-
+// Use course routes
+app.use("/api/course", courseRoutes);
 // app.use('/api/forgotPassword', passwordRoutes); // You can choose your route prefix
 app.post('/forgotPassword', (req, res) => {
   const { email } = req.body;

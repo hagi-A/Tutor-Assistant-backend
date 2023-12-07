@@ -16,10 +16,11 @@ const loginTutor = async (req, res) => {
   try {
     // Find the user by email or username using the custom login method
     const tutor = await Tutor.tutorlogin(emailOrUsername, password);
+    delete tutor["password"];
     // create a token with user's _id and role
     const selectedRole = tutor.selectedRole;
-    const token = createToken({ userId: tutor._id, role: tutor.selectedRole });
-    res.status(200).json({ emailOrUsername, token, selectedRole });
+    const token = createToken({ tutorId: tutor._id, role: tutor.selectedRole });
+    res.status(200).json({ token, tutor });
 
     console.log(tutor);
   } catch (error) {
@@ -120,7 +121,15 @@ const acceptAction = async (req, res) => {
 const denyTutorRequest = async (req, res) => {
   try {
     const { id } = req.params;
-    const { denialReasons } = req.body;
+    let { denialReasons } = req.body;
+
+    // Ensure denialReasons is an array
+     denialReasons = Array.isArray(denialReasons) ? denialReasons : [denialReasons];
+
+    // Ensure denialReasons is an array of strings
+    const formattedDenialReasons = denialReasons.map((reason) =>
+      reason.toString()
+    );
 
     // Fetch details of the tutor to get the name and email before deleting
     const tutorDetails = await Tutor.findById(id);
@@ -130,10 +139,10 @@ const denyTutorRequest = async (req, res) => {
     // Create a Blacklist entry
     const blacklistEntry = await Blacklist.create({
       tutor: id,
-      denialReasons,
+      denialReasons: formattedDenialReasons,
     });
-
-    // // Delete the tutor's data from the database
+    console.log(tutorDetails);
+    // Delete the tutor's data from the database
     // const deletedTutor = await Tutor.findByIdAndDelete(id);
 
     if (tutorDetails) {
@@ -152,7 +161,7 @@ const denyTutorRequest = async (req, res) => {
         subject: "Tutor Request Denied",
         text: `Dear ${
           tutorDetails.firstName
-        }, your tutor request has been denied.\n\nDenial Reasons: Reasons: ${denialReasons.join(
+        }, your tutor request has been denied.\n\nDenial Reasons: Reasons:${formattedDenialReasons.join(
           ", "
         )}`,
         // You can include more details or HTML for the email content
@@ -169,8 +178,9 @@ const denyTutorRequest = async (req, res) => {
       console.log("Tutor details not found for sending email.");
     }
 
-    res.json({ success: true, blacklistEntry });
+    // res.json({ success: true, blacklistEntry });
   } catch (error) {
+    console.log(error.message)
     res.send({ message: error.message });
   }
 };
@@ -197,10 +207,43 @@ const updateTutorProfile = async (req, res) => {
   }
 };
 
+const getTutorById = async (req, res) => {
+  try {
+    const tutorId = req.params.id;
+
+    // Assuming you have a method to find a tutor by ID in your Tutor model
+    const tutor = await Tutor.findById(tutorId);
+
+    if (!tutor) {
+      return res.status(404).json({ error: "Tutor not found" });
+    }
+
+    // Return tutor details
+    res.json(tutor);
+  } catch (error) {
+    console.error("Error fetching tutor details:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+const fethcTutor = async (req, res) => {
+  const tutorId = parseInt(req.params.id);
+  const tutor = Tutor.find((t) => t.tutorId === tutorId);
+
+  if (!tutor) {
+    return res.status(404).json({ error: "Tutor not found" });
+  }
+
+  // Return tutor data
+  res.json(tutor);
+};
 
 module.exports = {
   acceptAction,
   denyTutorRequest,
   loginTutor,
   updateTutorProfile,
+  fethcTutor,
+  getTutorById,
 };

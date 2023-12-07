@@ -6,6 +6,7 @@ const {
   signupUser,
   loginUser,
   getUsersExceptUserId,
+  getStudents,
   // allUsers,
   // // searchUserUsernames,
   // searchUsers,
@@ -26,6 +27,7 @@ router.post('/login', loginUser)
 router.post('/signup', signupUser)
 // Get users except the specified user by user ID route
 router.get("/:userId", getUsersExceptUserId);
+router.get("/students", getStudents);
 // router.get("/users/search", userController.searchUsers);
 // router.get('/search', searchUserUsernames);
 // router.get("/allUsers", tutorController.getAllTutors);

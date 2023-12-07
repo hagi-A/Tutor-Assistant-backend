@@ -6,6 +6,8 @@ const {
   acceptAction,
   loginTutor,
   updateTutorProfile,
+  fethcTutor,
+  getTutorById,
 } = require("../controller/tutorController");
 
 // Define the tutor registration route
@@ -25,6 +27,9 @@ router.put("/tutor-requests/:id/accept", acceptAction);
 router.post("/tutorlogin", loginTutor);
 // Route to update tutor rank
 router.put("/updateTutorProfile/:id", updateTutorProfile);
+router.get("/tutorProfile/:id", fethcTutor);
+// Route to fetch tutor details by ID
+router.get('/:id', getTutorById);
 // router.get("/allTutors", tutorController.getAllTutors);
 // router.get("/tutors/search", tutorController.searchTutors);
 

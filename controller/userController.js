@@ -86,10 +86,30 @@ const signupUser = async (req, res) => {
     
 }
 
+const getStudents = async (req, res) => {
+  try {
+    // Extract tutorId from the request parameters or headers
+    // const { tutorId } = req.query;
+
+    // Fetch students associated with the tutorId
+    const students = await User.find({}, function (err, cursor) {
+      cursor.each(function (err, item) {
+        console.log(item);
+      })
+    });
+    console.log(students);
+    // Return the students in the response
+    res.json(students);
+  } catch (error) {
+    console.error('Error fetching students:', error);
+    res.send({ error: error });
+  }
+};
+
 const getUsersExceptUserId = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const users = await Users.find({ _id: { $ne: userId } });
+    const users = await User.find({ _id: { $ne: userId } });
 
     const usersData = await Promise.all(
       users.map(async (user) => {
@@ -102,6 +122,7 @@ const getUsersExceptUserId = async (req, res) => {
         };
       })
     );
+    
 
     res.status(200).json(usersData);
   } catch (error) {
@@ -179,6 +200,7 @@ module.exports = {
   signupUser,
   loginUser,
   getUsersExceptUserId,
+  getStudents,
   // allUsers,
   // getAllUser,
   // getUser,
