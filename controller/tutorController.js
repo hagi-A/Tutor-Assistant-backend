@@ -1,9 +1,11 @@
 const Tutor = require("../models/tutorModel");
+const Course = require("../models/course")
 const Blacklist = require("../models/blacklistModel");
 const nodemailer = require("nodemailer");
 const generateUsername = require("../helpers/usernameGenerator"); // Import the generateUsername function
 const generatePassword = require("../helpers/passwordGenerator"); // Import the generatePassword function
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
 const bcrypt = require("bcrypt");
 const createToken = (_id, selectedRole) => {
   return jwt.sign({ _id, selectedRole }, process.env.SECRET, {
@@ -118,7 +120,7 @@ const acceptAction = async (req, res) => {
   }
 };
 
-const denyTutorRequest = async (req, res) => {
+const blacklistTutorRequest = async (req, res) => {
   try {
     const { id } = req.params;
     let { denialReasons } = req.body;
@@ -159,13 +161,14 @@ const denyTutorRequest = async (req, res) => {
         from: process.env.EMAIL_USER,
         to: email,
         subject: "Tutor Request Denied",
-        text: `Dear ${
-          tutorDetails.firstName
-        }, your tutor request has been denied.\n\nDenial Reasons: Reasons:${formattedDenialReasons.join(
+        text: `Dear ${tutorDetails.firstName
+          }, We regret to inform you that your recent tutor request has been denied. After careful consideration, we have decided to blacklist your profile due to the following reasons:
+      ${formattedDenialReasons.join(
           ", "
-        )}`,
-        // You can include more details or HTML for the email content
-      };
+      )}
+      While your request has been denied, we understand that circumstances may vary, and we are providing you with a second chance to correct the issues. You have a WEEK to resubmit your tutor request with the required information. Please ensure that you address the issues mentioned above.
+      `};
+        // You can include more details or HTML for the email content;
 
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
@@ -184,6 +187,98 @@ const denyTutorRequest = async (req, res) => {
     res.send({ message: error.message });
   }
 };
+
+const denyAction = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let { denialReasons } = req.body;
+
+    // Ensure denialReasons is an array
+    denialReasons = Array.isArray(denialReasons)
+      ? denialReasons
+      : [denialReasons];
+
+    // Ensure denialReasons is an array of strings
+    const formattedDenialReasons = denialReasons.map((reason) =>
+      reason.toString()
+    );
+
+    // Fetch details of the tutor to get the name and email before deleting
+    const tutorDetails = await Tutor.findById(id);
+
+    if (!tutorDetails) {
+      return res.send({ message: "Tutor not found" });
+    }
+
+    // Create a Deny entry (you can adjust this based on your data model)
+    // const denyEntry = await Deny.create({
+    //   tutor: id,
+    //   denialReasons: formattedDenialReasons,
+    // });
+
+    // Delete the tutor's data from the database
+    await Tutor.findByIdAndDelete(id);
+
+    // Optionally, delete files associated with the tutor (replace 'files' with your actual file storage path)
+    // Delete files associated with the tutor
+    if (tutorDetails.selectedImages) {
+      deleteFiles(tutorDetails.selectedImages);
+    }
+    if (tutorDetails.selectedCVs) {
+      deleteFiles(tutorDetails.selectedCVs);
+    }
+
+    // Send notification email to the tutor
+    const email = tutorDetails.email;
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Tutor Request Denied",
+      text: `Dear ${
+        tutorDetails.firstName
+      }, your tutor request has been denied.\n\nDenial Reasons: Reasons:${formattedDenialReasons.join(
+        ", "
+      )}`,
+      // You can include more details or HTML for the email content
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.log(error.message);
+    res.send({ message: "Internal server error" });
+  }
+};
+
+// Helper function to delete files (you may need to implement this based on your file storage)
+const deleteFiles = (filename) => {
+  const filePath = `files/${filename}`;
+
+  // Use the unlink function to delete the file
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      console.error(`Error deleting file ${filename}: ${err.message}`);
+    } else {
+      console.log(`File ${filename} deleted successfully`);
+    }
+  });
+};
+
 // Update the function that handles rank changes
 const updateTutorProfile = async (req, res) => {
   const { id } = req.params;
@@ -239,11 +334,36 @@ const fethcTutor = async (req, res) => {
   res.json(tutor);
 };
 
+const getCourseByTutorId = async (req, res) => {
+  const { tutorId } = req.params;
+
+  try {
+    // Fetch the tutor by ID
+    const tutor = await Tutor.findById(tutorId);
+
+    if (!tutor) {
+      console.log("not found");
+      return res.status(404).json({ error: 'Tutor not found' });
+    }
+
+    // Fetch the selected courses using the tutor's selectedCourses field
+    const selectedCourses = await Course.find({ _id: { $in: tutor.courses } });
+    console.log(tutor.courses);
+    res.json(selectedCourses);
+  } catch (error) {
+    console.error('Error fetching selected courses:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
 module.exports = {
   acceptAction,
-  denyTutorRequest,
+  denyAction,
+  blacklistTutorRequest,
   loginTutor,
   updateTutorProfile,
   fethcTutor,
   getTutorById,
+  getCourseByTutorId,
 };

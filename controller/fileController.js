@@ -36,8 +36,12 @@ const imageUpload = async (req, res) => {
     const phoneNumber = formData.phoneNumber;
     const location = formData.location;
     const majorTaken = formData.majorTaken;
+    const dateOfBirth = formData.dateOfBirth; // Assuming the birthdate is provided in the formData
     // const priceRate = formData.price;
     const gradeLevel = formData.gradeLevel;
+    const courses = formData.courses; // Assuming courses is an array of course IDs
+    const gender = formData.gender; // Assuming gender is provided in the formData
+
     if (!formData.firstName) {
       console.log("firstname");
       return res.send({ error: "Please enter your First Name" });
@@ -74,6 +78,18 @@ const imageUpload = async (req, res) => {
       console.log("gradeLevel");
       return res.send({ error: "Please Select Grade Lavel" });
     }
+    if (!formData.dateOfBirth) {
+      console.log("dateOfBirth");
+      return res.send({ error: "Please Select Date of birth " });
+    }
+    if (!formData.courses) {
+      console.log("courses");
+      return res.send({ error: "Please Select course" });
+    }
+    if (!formData.gender) {
+      console.log("gender");
+      return res.send({ error: "Please Select gender" });
+    }
     // if (!selectedCVs) {
     //   console.log("cvName");
     //   console.log(req.body);
@@ -90,6 +106,16 @@ const imageUpload = async (req, res) => {
       return res.send({ error: "Invalid Ethiopian phone number format" });
     }
 
+    // Calculate age based on birthdate
+    const birthYear = new Date(dateOfBirth).getFullYear();
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - birthYear;
+
+    // Check if the user is too young to register
+    if (age < 12) {
+      throw Error("User is too young to register");
+    }
+
     const tutor = new Tutor({
       firstName,
       lastName,
@@ -98,6 +124,9 @@ const imageUpload = async (req, res) => {
       location,
       phoneNumber,
       majorTaken,
+      age,
+      courses,
+      gender,
       // priceRate,
       gradeLevel,
       selectedCVs,
@@ -106,14 +135,14 @@ const imageUpload = async (req, res) => {
 
     // Save the new tutor to the database
     await tutor.save();
-    console.log(req.body);
+    console.log(formData);
     //  console.log(req.files);
     res.status(201).json({ message: "Tutor registered successfully" });
   } catch (error) {
     console.error("Tutor registration error:", error);
     res.send({ error: "Internal server error" });
   }
-
+// console.log("Received formData:", formData);
   // console.log(imageName,cvName);
   // console.log("""req""");
   // res.send({ name: "" });

@@ -92,6 +92,20 @@ const tutorSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  gender: {
+    type: String,
+    enum: ["Male", "Female"],
+  },
+  age: {
+    type: Number,
+    required: true,
+  },
+  courses: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+    },
+  ],
 });
 
 // tutorSchema.plugin(mongoosePaginate);

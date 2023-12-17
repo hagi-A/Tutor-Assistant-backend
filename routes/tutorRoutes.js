@@ -2,12 +2,14 @@ const express = require('express');
 const router = express.Router();
 
 const {
-  denyTutorRequest,
+  blacklistTutorRequest,
+  denyAction,
   acceptAction,
   loginTutor,
   updateTutorProfile,
   fethcTutor,
   getTutorById,
+  getCourseByTutorId,
 } = require("../controller/tutorController");
 
 // Define the tutor registration route
@@ -20,7 +22,10 @@ const {
 // );
 
 // Define routes
-router.put('/tutor-requests/:id/deny', denyTutorRequest);
+router.put("/tutor-requests/:id/blacklist", blacklistTutorRequest);
+
+// Define routes
+router.put("/tutor-requests/:id/deny", denyAction);
 // Define routes
 router.put("/tutor-requests/:id/accept", acceptAction);
 
@@ -30,6 +35,7 @@ router.put("/updateTutorProfile/:id", updateTutorProfile);
 router.get("/tutorProfile/:id", fethcTutor);
 // Route to fetch tutor details by ID
 router.get('/:id', getTutorById);
+router.get("/getCourses/:tutorId", getCourseByTutorId);
 // router.get("/allTutors", tutorController.getAllTutors);
 // router.get("/tutors/search", tutorController.searchTutors);
 
