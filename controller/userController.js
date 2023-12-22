@@ -45,10 +45,11 @@ const loginUser = async (req, res) => {
     try{
       // Find the user by email or username using the custom login method
       const user = await User.login(emailOrUsername, password);
+      delete user["password"];
       // create a token with user's _id and role
       const selectedRole = user.selectedRole;
       const token = createToken({ userId: user._id, role: user.selectedRole });
-      res.status(200).json({ emailOrUsername, token, selectedRole });
+      res.status(200).json({ token, user });
 
       console.log(user);
     }catch (error) {

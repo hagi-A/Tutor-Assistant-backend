@@ -22,6 +22,9 @@ const Tutor = require('./models/tutorModel');
 const course = require("./models/course");
 const supervisorRouter = require('./routes/supervisorRouter')
 const courseRoutes = require("./routes/courseRoutes");
+const courseRequestRouter = require("./routes/courseRequestRouter");
+const tutorRequestRouter = require("./routes/tutorRequestRouter");
+
 // const io = require("socket.io")({
 //   cors: {
 //     origin: "http://localhost:3000",
@@ -147,6 +150,8 @@ app.use("/api/message", messageRoutes);
 app.use("/api/files", fileRoutes);
 // Use course routes
 app.use("/api/course", courseRoutes);
+app.use("/api/tutorRequest", tutorRequestRouter)
+app.use("/api/courseRequest", courseRequestRouter);
 // app.use('/api/forgotPassword', passwordRoutes); // You can choose your route prefix
 app.post('/forgotPassword', (req, res) => {
   const { email } = req.body;
