@@ -24,12 +24,14 @@ const supervisorRouter = require('./routes/supervisorRouter')
 const courseRoutes = require("./routes/courseRoutes");
 const courseRequestRouter = require("./routes/courseRequestRouter");
 const tutorRequestRouter = require("./routes/tutorRequestRouter");
+const adminAuthRoute = require("./routes/adminAuthRoute");
+const quizRoutes = require("./routes/quizRoutes");
 
-// const io = require("socket.io")({
-//   cors: {
-//     origin: "http://localhost:3000",
-//   },
-// });
+const io = require("socket.io")({
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
 // express app
 const app = express();
 const allowedOrigins = [
@@ -53,65 +55,62 @@ app.use((req, res, next) => {
   next()
 });
 
-// Socket.io
-// let users = [];
-// io.on('connection', socket => {
-//     console.log('User connected', socket.id);
-//     socket.on('addUser', userId => {
-//         const isUserExist = users.find(user => user.userId === userId);
-//         if (!isUserExist) {
-//             const user = { userId, socketId: socket.id };
-//             users.push(user);
-//             io.emit('getUsers', users);
-//         }
-//     });
+// 
+let activeUsers = [];
 
-//     socket.on('sendMessage', async ({ senderId, receiverId, message, conversationId }) => {
-//         const receiver = users.find(user => user.userId === receiverId);
-//         const sender = users.find(user => user.userId === senderId);
-//         const user = await User.findById(senderId);
-//         console.log('sender :>> ', sender, receiver);
-//         if (receiver) {
-//             io.to(receiver.socketId)
-//               .to(sender.socketId)
-//               .emit("getMessage", {
-//                 senderId,
-//                 message,
-//                 conversationId,
-//                 receiverId,
-//                 user: {
-//                   id: user._id,
-//                   username: user.username,
-//                   email: user.email,
-//                 },
-//               });
-//             }else {
-//                 io.to(sender.socketId).emit("getMessage", {
-//                   senderId,
-//                   message,
-//                   conversationId,
-//                   receiverId,
-//                   user: {
-//                     id: user._id,
-//                     username: user.username,
-//                     email: user.email,
-//                   },
-//                 });
-//             }
-//         });
+io.on("connection", (socket) => {
+  // Add new User
+  socket.on("addUser", (userId) => {
+    // Check if user is not added previously
+    if (!activeUsers.some((user) => user.userId === userId)) {
+      activeUsers.push({ userId, socketId: socket.id });
+      console.log("New User Connected", activeUsers);
+    }
+    // Send all active users to the new user
+    io.emit("getUsers", activeUsers);
+  });
 
-//     socket.on('disconnect', () => {
-//         users = users.filter(user => user.socketId !== socket.id);
-//         io.emit('getUsers', users);
-//     });
-//     // io.emit('getUsers', socket.userId);
-// });
+  // Send message to a specific user
+  socket.on("sendMessage", (data) => {
+    const { senderId, receiverId, message, conversationId } = data;
+    const receiver = activeUsers.find((user) => user.userId === receiverId);
+    const sender = activeUsers.find((user) => user.userId === senderId);
 
+    if (receiver) {
+      io.to(receiver.socketId).to(sender.socketId).emit("getMessage", {
+        senderId,
+        message,
+        conversationId,
+        receiverId,
+        // Additional user details could be added here
+      });
+    } else {
+      io.to(sender.socketId).emit("getMessage", {
+        senderId,
+        message,
+        conversationId,
+        receiverId,
+        // Additional user details could be added here
+      });
+    }
+  });
+
+  // Handle user disconnection
+  socket.on("disconnect", () => {
+    // Remove user from active users
+    activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
+    console.log("User Disconnected", activeUsers);
+    // Send all active users to all users
+    io.emit("getUsers", activeUsers);
+  });
+});
 
 app.use('/api/user', user)
+
+app.use("/api/adminAuth", adminAuthRoute);
 // app.use('/uploads', express.static('uploads')); // Serve uploaded files
 app.use('/api/tutor', tutorRoutes); // Use the tutor registration route
-// app.use("/api/chat", chatRoutes);
+app.use("/api/chat", chatRoutes);
 app.use("/api/supervisor", supervisorRouter);
 app.get("/getUsers", (req, res) => {
   userModel.find()
@@ -152,6 +151,7 @@ app.use("/api/files", fileRoutes);
 app.use("/api/course", courseRoutes);
 app.use("/api/tutorRequest", tutorRequestRouter)
 app.use("/api/courseRequest", courseRequestRouter);
+app.use("/api/quizzes", quizRoutes);
 // app.use('/api/forgotPassword', passwordRoutes); // You can choose your route prefix
 app.post('/forgotPassword', (req, res) => {
   const { email } = req.body;

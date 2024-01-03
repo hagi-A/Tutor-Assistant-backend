@@ -2,7 +2,13 @@ const mongoose = require('mongoose')
 const bcrypt = require("bcrypt");
 const validator = require("validator");
 
-
+const gradeMapping = {
+  "Kindergarten": "Kg-prep",
+  "Elementary": "1-5",
+  "Middle School": "6-8",
+  "High School": "9-12",
+  "College": "College",
+};
 // const mongoosePaginate = require("mongoose-paginate-v2");
 
 const Schema = mongoose.Schema
@@ -100,13 +106,41 @@ const tutorSchema = new Schema({
     type: Number,
     required: true,
   },
-  courses: [
+  package: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
+      type: String,
     },
   ],
+  // courses: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: "Course",
+  //   },
+  // ],
+  // grade: [
+  //   {
+  //     type: String,
+
+  //   },
+  // ],
 });
+
+// Pre-save middleware to set gradeLevel based on grade
+// tutorSchema.pre('save', function (next) {
+//   if (this.isModified('gradeLevel')) {
+//     // Set gradeLevel based on grade mapping
+//     this.grade = gradeMapping[this.gradeLevel] || this.gradeLevel;
+//   }
+//   next();
+// });
+tutorSchema.pre("save", function (next) {
+  if (this.isModified("gradeLevel")) {
+    // Map each element of the grade array to its corresponding gradeLevel
+    this.grade = this.gradeLevel.map((g) => gradeMapping[g] || g);
+  }
+  next();
+});
+
 
 // tutorSchema.plugin(mongoosePaginate);
 tutorSchema.statics.tutorlogin = async function (emailOrUsername, password) {

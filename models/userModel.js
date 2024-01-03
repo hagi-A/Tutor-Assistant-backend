@@ -34,7 +34,7 @@ const userSchema = new Schema({
   },
   selectedRole: {
     type: String,
-    enum: ["Parent", "Student", "Tutor", "Admin", "Supervisor"],
+    enum: ["Parent", "Student", "Tutor"],
     required: true,
   },
   token: {

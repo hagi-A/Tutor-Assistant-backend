@@ -1,59 +1,44 @@
-// models/course.js
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
 
-const courseSchema = new Schema({
-  courseCode: {
+const courseSchema = new mongoose.Schema({
+  gradeLevel: {
     type: String,
     required: true,
   },
-  courseTitle: {
+  package: {
     type: String,
     required: true,
   },
-  courseDescription: {
-    type: String,
-    required: true,
-  },
-  courseObjectives: {
-    type: String,
-    required: true,
-  },
-  courseContent: {
-    type: String,
-    required: true,
-  },
-//   grade: {
-//     type: String,
-//     required: true,
-//   },
-  //   tutor: {
-  //     type: mongoose.Schema.Types.ObjectId,
-  //     ref: "Tutor", // Assuming your tutor model is named 'Tutor'
-  //     required: true,
-  //   },
   price: {
     type: Number,
     required: true,
   },
-  resourse: {
-    type: String,
-    required: true,
-  },
-  gradeLevel: [
+  courses: [
     {
-      // name: String,
-      type: String,
-      // required: true,
-
-      // enum: [
-      //   "Kindergarten",
-      //   "Elementary",
-      //   "Middle School",
-      //   "High School",
-      //   "College",
-      // ],
+      courseCode: {
+        type: String,
+        required: true,
+      },
+      courseTitle: {
+        type: String,
+        required: true,
+      },
+      courseDescription: {
+        type: String,
+        required: true,
+      },
+      courseObjectives: {
+        type: String,
+        required: true,
+      },
+      courseContent: {
+        type: String,
+        required: true,
+      },
+      referenceLinks: {
+        type: String,
+      },
     },
   ],
 });
@@ -61,3 +46,5 @@ const courseSchema = new Schema({
 const Course = mongoose.model("Course", courseSchema);
 
 module.exports = Course;
+
+

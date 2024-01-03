@@ -39,7 +39,7 @@ const imageUpload = async (req, res) => {
     const dateOfBirth = formData.dateOfBirth; // Assuming the birthdate is provided in the formData
     // const priceRate = formData.price;
     const gradeLevel = formData.gradeLevel;
-    const courses = formData.courses; // Assuming courses is an array of course IDs
+    const selectedPackage = formData.selectedPackage; // Assuming courses is an array of course IDs
     const gender = formData.gender; // Assuming gender is provided in the formData
 
     if (!formData.firstName) {
@@ -82,9 +82,9 @@ const imageUpload = async (req, res) => {
       console.log("dateOfBirth");
       return res.send({ error: "Please Select Date of birth " });
     }
-    if (!formData.courses) {
-      console.log("courses");
-      return res.send({ error: "Please Select course" });
+    if (!formData.selectedPackage) {
+      console.log("selectedPackage");
+      return res.send({ error: "Please Select Package" });
     }
     if (!formData.gender) {
       console.log("gender");
@@ -110,10 +110,11 @@ const imageUpload = async (req, res) => {
     const birthYear = new Date(dateOfBirth).getFullYear();
     const currentYear = new Date().getFullYear();
     const age = currentYear - birthYear;
+    
 
     // Check if the user is too young to register
     if (age < 12) {
-      throw Error("User is too young to register");
+      return res.send("User is too young to register");
     }
 
     const tutor = new Tutor({
@@ -125,7 +126,7 @@ const imageUpload = async (req, res) => {
       phoneNumber,
       majorTaken,
       age,
-      courses,
+      selectedPackage,
       gender,
       // priceRate,
       gradeLevel,
