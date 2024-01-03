@@ -6,7 +6,7 @@ const {
 } = require("../controller/quizController");
 
 // POST /api/quizzes
-router.post("/", createQuiz);
+router.post("/createQuiz", createQuiz);
 
 // GET /api/quizzes/:courseId
 router.get("/:courseId", getQuizzesByCourse);
