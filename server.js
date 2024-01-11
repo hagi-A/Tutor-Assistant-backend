@@ -1,7 +1,7 @@
 require('dotenv').config()
 
 const bcrypt = require("bcrypt");
-
+const validator = require("validator");
 const express = require('express')
 const cors = require("cors");
 const mongoose = require('mongoose')
@@ -26,6 +26,7 @@ const courseRequestRouter = require("./routes/courseRequestRouter");
 const tutorRequestRouter = require("./routes/tutorRequestRouter");
 const adminAuthRoute = require("./routes/adminAuthRoute");
 const quizRoutes = require("./routes/quizRoutes");
+const assignmentRoutes = require("./routes/assignmentRoutes");
 
 const io = require("socket.io")({
   cors: {
@@ -152,6 +153,7 @@ app.use("/api/course", courseRoutes);
 app.use("/api/tutorRequest", tutorRequestRouter)
 app.use("/api/courseRequest", courseRequestRouter);
 app.use("/api/quizzes", quizRoutes);
+app.use("/api/assignment", assignmentRoutes);
 // app.use('/api/forgotPassword', passwordRoutes); // You can choose your route prefix
 app.post('/forgotPassword', (req, res) => {
   const { email } = req.body;
@@ -225,12 +227,16 @@ app.post("/tutorForgotPassword", (req, res) => {
 });
 
 app.post('/resetPassword/:id/:token', (req, res) => {
-  const { id, token } = req.params
-  const { password } = req.body
-  
+  const { id, token } = req.params;
+  const { password } = req.body;
+  // Validate the password
+  if (!validator.isStrongPassword(password)) {
+    return res.status(400).json({ Status: "Password not strong enough" });
+  }
+
   jwt.verify(token, process.env.SECRET, (err, decoded) => {
     if (err) {
-      return res.json({Status: "Error with token"})
+      return res.json({ Status: "Error with token" });
     } else {
       bcrypt
         .hash(password, 10)
@@ -241,11 +247,15 @@ app.post('/resetPassword/:id/:token', (req, res) => {
         })
         .catch((err) => res.send({ Status: err }));
     }
-  })
+  });
 })
 app.post("/tutorResetPassword/:id/:token", (req, res) => {
   const { id, token } = req.params;
   const { password } = req.body;
+  // Validate the password
+  if (!validator.isStrongPassword(password)) {
+    return res.status(400).json({ Status: "Password not strong enough" });
+  }
 
   jwt.verify(token, process.env.SECRET, (err, decoded) => {
     if (err) {

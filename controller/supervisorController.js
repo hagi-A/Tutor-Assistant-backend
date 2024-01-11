@@ -14,6 +14,18 @@ const getTutorById = async (req, res) => {
   }
 };
 
+const getAcceptedTutorsByRank = async (req, res) => {
+  try {
+    const acceptedTutors = await Tutor
+      .find({ status: "Accepted" })
+      .sort({ rank: "desc" });
+    res.json(acceptedTutors);
+  } catch (err) {
+    console.error("Error fetching accepted tutors:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 // controllers/supervisorController.js
 const updateTutor = async (req, res) => {
   const { id } = req.params;
@@ -98,5 +110,6 @@ module.exports = {
   handleCourseRequest,
   getTutorNotifications,
   getNotifications,
+  getAcceptedTutorsByRank,
   // Add other tutor-related controller functions as needed
 };

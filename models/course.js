@@ -36,10 +36,11 @@ const courseSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
-      referenceLinks: {
-        type: String,
-      },
+      // referenceLinks: {
+      //   type: String,
+      // },
     },
+  
   ],
 });
 

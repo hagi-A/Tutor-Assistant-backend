@@ -106,7 +106,7 @@ const tutorSchema = new Schema({
     type: Number,
     required: true,
   },
-  package: [
+  selectedPackages: [
     {
       type: String,
     },

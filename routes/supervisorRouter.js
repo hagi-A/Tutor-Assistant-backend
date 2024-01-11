@@ -6,6 +6,7 @@ const {
   handleCourseRequest,
   getNotifications,
   getTutorNotifications,
+  getAcceptedTutorsByRank,
 } = require("../controller/supervisorController");
 
 // GET tutor by ID
@@ -14,6 +15,8 @@ router.get("/tutorProfile/:id", getTutorById);
 router.put("/updateTutorGradeLevel/:id", updateTutor);
 // Get notifications for the supervisor
 router.get('/notifications', getNotifications);
+
+router.get("/getAcceptedTutors", getAcceptedTutorsByRank);
 // Get tutor-specific notifications for the supervisor
 router.get('/tutor-notifications/:tutorId', getTutorNotifications);
 // Approve or deny a course request

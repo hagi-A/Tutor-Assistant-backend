@@ -39,7 +39,7 @@ const imageUpload = async (req, res) => {
     const dateOfBirth = formData.dateOfBirth; // Assuming the birthdate is provided in the formData
     // const priceRate = formData.price;
     const gradeLevel = formData.gradeLevel;
-    const selectedPackage = formData.selectedPackage; // Assuming courses is an array of course IDs
+    const selectedPackages = formData.selectedPackages; // Assuming courses is an array of course IDs
     const gender = formData.gender; // Assuming gender is provided in the formData
 
     if (!formData.firstName) {
@@ -82,7 +82,7 @@ const imageUpload = async (req, res) => {
       console.log("dateOfBirth");
       return res.send({ error: "Please Select Date of birth " });
     }
-    if (!formData.selectedPackage) {
+    if (!formData.selectedPackages) {
       console.log("selectedPackage");
       return res.send({ error: "Please Select Package" });
     }
@@ -126,7 +126,7 @@ const imageUpload = async (req, res) => {
       phoneNumber,
       majorTaken,
       age,
-      selectedPackage,
+      selectedPackages,
       gender,
       // priceRate,
       gradeLevel,

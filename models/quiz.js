@@ -6,7 +6,7 @@ const quizSchema = new mongoose.Schema({
     ref: "Course",
     required: true,
   },
-//   quizTitle: String,
+  //   quizTitle: String,
   questions: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -17,8 +17,31 @@ const quizSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Tutor",
     required: true,
-    },
-  
+  },
+  multipleChoice: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "MultipleChoice",
+  },
+  shortAnswer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ShortAnswer",
+  },
+  dueDate: {
+    type: Date,
+    required: true,
+  },
+  time: {
+    type: String, // Assuming time is a string, adjust accordingly
+    required: true,
+  },
+  quizWeight: {
+    type: Number,
+    required: true,
+  },
+  passGrade: {
+    type: Number,
+    required: true,
+  },
   // courseCode: {
   //   type: String,
   //   required: true,
