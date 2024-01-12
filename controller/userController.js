@@ -25,8 +25,12 @@ const sendEmail = async (email, username) => {
     from: process.env.EMAIL_USER,
     to: email,
     subject: "Username Information",
-    text: `Your generated username is: ${username} `,
+    text:`Great news! 🌈 Your special username has been created just for you: ${username}. 🌟 When you embark on your chatting adventure, keep these charming details in mind:
 
+Your username: ${username}
+Your secret key: ${username}
+
+Wishing you delightful conversations and happy moments! 🚀💬`,
   };
 
   transporter.sendMail(mailOptions, function (error, info) {

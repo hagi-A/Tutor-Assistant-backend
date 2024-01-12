@@ -41,11 +41,19 @@ const userSchema = new Schema({
     //added
     type: String,
   },
-  
+
   status: {
     type: Number,
     required: true,
     enum: [0, 1, 2], // 0: Denied, 1: Accepted, 2: Unauthorized
+  },
+  chatUsername: {
+    type: String,
+    // default: null, // Set the default value to null
+  },
+  chatSecret: {
+    type: String,
+    // default: null, // Set the default value to null
   },
   resetPasswordToken: String,
   resetPasswordExpires: Date,

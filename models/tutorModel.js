@@ -83,6 +83,14 @@ const tutorSchema = new Schema({
     type: String,
     // default: null, // Set the default value to null
   },
+  chatUsername: {
+    type: String,
+    // default: null, // Set the default value to null
+  },
+  chatSecret: {
+    type: String,
+    // default: null, // Set the default value to null
+  },
   selectedRole: {
     type: String,
     default: "Tutor",
