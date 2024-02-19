@@ -2,7 +2,7 @@ const TutorRequest = require("../models/tutorRequest");
 const Tutor = require("../models/tutorModel");
 
 const createTutorRequest = async (req, res) => {
-    const { gender, grade, courses, profession } = req.body;
+    const { gender, grade, selectedPackages, profession } = req.body;
     const creator = req.params.userId;
   try {
     
@@ -17,7 +17,7 @@ const createTutorRequest = async (req, res) => {
     const newTutorRequest = new TutorRequest({
       gender,
       grade,
-      courses,
+      selectedPackages,
       profession,
       creator: creator,
     });

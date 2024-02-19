@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const bcrypt = require("bcrypt");
+const axios = require('axios');
 const validator = require("validator");
 const express = require('express')
 const cors = require("cors");
@@ -15,6 +16,7 @@ const nodemailer = require("nodemailer");
 const User = require('./models/userModel')
 const userModel = require('./models/userModel');
 const tutorModel = require("./models/tutorModel");
+const paymentModel = require("./models/paymentModel");
 const conversationRoutes = require("./routes/conversationRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const fileRoutes = require("./routes/fileRoutes");
@@ -27,6 +29,9 @@ const tutorRequestRouter = require("./routes/tutorRequestRouter");
 const adminAuthRoute = require("./routes/adminAuthRoute");
 const quizRoutes = require("./routes/quizRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
+const searchRoute = require("./routes/searchRoute");
+const reportRoute = require("./routes/reportRoute");
+const request = require("request");
 
 const io = require("socket.io")({
   cors: {
@@ -154,6 +159,8 @@ app.use("/api/tutorRequest", tutorRequestRouter)
 app.use("/api/courseRequest", courseRequestRouter);
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/assignment", assignmentRoutes);
+app.use("/api/search", searchRoute);
+app.use("/api/report", reportRoute);
 // app.use('/api/forgotPassword', passwordRoutes); // You can choose your route prefix
 app.post('/forgotPassword', (req, res) => {
   const { email } = req.body;
@@ -273,6 +280,102 @@ app.post("/tutorResetPassword/:id/:token", (req, res) => {
   });
 });
 app.use("/api/chat", chatRoutes);
+
+
+app.post("/api/accept-payment", (req, res) => {
+  const {
+    amount,
+    currency,
+    email,
+    first_name,
+    last_name,
+    phone_number,
+    tx_ref,
+  } = req.body;
+  // var options = {
+  //   method: "POST",
+  //   url: "https://api.chapa.co/v1/transaction/initialize",
+  //   headers: {
+  //     Authorization: "CHAPUBK_TEST-WM67XT5wvON1TJXNQWogvtmbKc6sGSFD", //Replace 'CHAPA-AUTH-KEY' with your Chapa Auth Key from https://dashboard.chapa.co/dashboard/profile/api
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify({
+  //     amount: amount,
+  //     currency: currency,
+  //     email: email,
+  //     first_name: first_name,
+  //     last_name: last_name,
+  //     phone_number: phone_number,
+  //     tx_ref: tx_ref,
+  //     // return_url: "http://localhost:3001", //Url to Return once payment is completed
+  //     "customization[title]": "Payment",
+  //   }),
+  // };
+
+  // request(options, function (error, response) {
+  //   if (error) {
+  //     res.json({ error: error });
+  //     return;
+  //   }
+  //   res.json({ success: response });
+
+  //   // Store Payment Details in MongoDB
+  //       const model={
+  //           amount:amount,
+  //           currency:currency,
+  //           email:email,
+  //           first_name:first_name,
+  //           last_name:last_name,
+  //           phone_number:phone_number,
+  //           tx_ref:tx_ref,
+  //       }
+  //       const data=new paymentModel(model)
+  //       data.save()
+  //       .then((resp)=>{
+  //             res.json({dbsuccess:resp})
+  //       }).catch((err)=>{
+  //             res.json({error:err})
+  //       })
+  // });
+  try {
+    const header = {
+      headers: {
+        Authorization: `Bearer ${CHAPA_AUTH_KEY}`,
+        "Content-Type": "application/json",
+      },
+    };
+    const body = {
+      amount: amount,
+      currency: currency,
+      email: email,
+      first_name: first_name,
+      last_name: last_name,
+      phone_number: phone_number,
+      tx_ref: tx_ref,
+      return_url: "http://localhost:3001", // Set your return URL
+    };
+    let resp = "";
+    // await axios
+    //   .post("https://api.chapa.co/v1/transaction/initialize", body, header)
+    //   .then((response) => {
+    //     resp = response;
+    //   })
+    //   .catch((error) => {
+    //     console.log(error.response.data);
+    //     console.log(error.response.status);
+    //     console.log(error.response.headers);
+    //     res.status(400).json({
+    //       message: error,
+    //     });
+    //   });
+    res.status(200).json(resp.data);
+  } catch (e) {
+    res.status(400).json({
+      error_code: e.code,
+      message: e.message,
+    });
+  }
+});
 // Search endpoint
 // app.get('/api/search', (req, res) => {
 //   const searchTerm = req.query.q; // Get the search query from the URL query parameter

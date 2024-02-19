@@ -1,5 +1,4 @@
 const express = require('express')
-// const requireRole = require('../middleware/requireRole');
 const {protect} = require('../middleware/authMiddleware')
 //controller functions
 const {
@@ -7,27 +6,20 @@ const {
   loginUser,
   getUsersExceptUserId,
   getStudents,
-  // allUsers,
-  // // searchUserUsernames,
-  // searchUsers,
 } = require("../controller/userController");
-// const {requireAuth} = require('../middleware/requireAuth')
 
 const router = express.Router()
-
-// router.use(requireRole)
-
-
-
 //login route
-// router.route("/").get(protect, allUsers);
-router.post('/login', loginUser)
-
+router.post('/login', loginUser);
 //signup route
-router.post('/signup', signupUser)
+router.post('/signup', signupUser);
 // Get users except the specified user by user ID route
 router.get("/:userId", getUsersExceptUserId);
 router.get("/students", getStudents);
+
+module.exports = router;
+
+
 // router.get("/users/search", userController.searchUsers);
 // router.get('/search', searchUserUsernames);
 // router.get("/allUsers", tutorController.getAllTutors);
@@ -59,5 +51,3 @@ router.get("/students", getStudents);
 //     res.json({ message: 'Welcome Supervisor!' });
 // });
 
-
-module.exports = router

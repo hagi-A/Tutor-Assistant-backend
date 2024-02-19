@@ -17,7 +17,6 @@ const userSchema = new Schema({
   },
   username: {
     type: String,
-    // default: null, // Set the default value to null
   },
   email: {
     type: String,
@@ -34,7 +33,7 @@ const userSchema = new Schema({
   },
   selectedRole: {
     type: String,
-    enum: ["Parent", "Student", "Tutor"],
+    enum: ["Parent", "Student"],
     required: true,
   },
   token: {
@@ -92,40 +91,30 @@ userSchema.statics.signup = async function (
     console.log(selectedRole)
     throw Error("Select your role");
   }
-
   if (!validator.isEmail(email)) {
     throw Error("Email is not valid");
   }
-
   if (!validator.isStrongPassword(password)) {
     throw Error("Password not strong enough");
   }
-
   const exist = await this.findOne({ email });
-
   if (exist) {
     throw Error("Email already in use");
   }
-
   const birthYear = new Date(birthdate).getFullYear();
   const currentYear = new Date().getFullYear();
   const age = currentYear - birthYear;
-
   if (age < 12) {
     throw Error("User is too young to register");
   }
-
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password, salt);
-
   let defaultStatus = 1; // Default to unauthorized
-
   if (selectedRole === "Parent" || selectedRole === "Student") {
     defaultStatus = 1; // Set to accepted for Parent and Student
   } else if (selectedRole === "Tutor") {
     defaultStatus = 0; // Set to denied for Tutor
   }
-
   const user = await this.create({
     firstName,
     lastName,
@@ -139,32 +128,20 @@ userSchema.statics.signup = async function (
 
   return user;
 };
-
-
 //static login method
-
 userSchema.statics.login = async function(emailOrUsername, password) {
-    // if (!emailOrUsername || !password) {
-    //   throw Error("All fields must be filled");
-    // }
-  
   const user = await User.findOne({
     $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
   });
-  
-
   if (!user) {
     throw Error('Incorrect username or email')
   }
-
   const match = await bcrypt.compare(password, user.password)
-
   if (!match) {
     throw Error('incorect password')
   }
   return user
 }
-
 // Extend the User model with custom methods
 userSchema.methods.generateRandomPassword = function (length) {
   const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
@@ -175,7 +152,6 @@ userSchema.methods.generateRandomPassword = function (length) {
   }
   return password;
 };
-
 userSchema.methods.updateUserPasswordAndToken = async function (newPassword, token, expiration) {
   try {
     // Hash and update the user's password in the database
@@ -191,9 +167,6 @@ userSchema.methods.updateUserPasswordAndToken = async function (newPassword, tok
     throw error;
   }
 };
-
 userSchema.plugin(mongoosePaginate);
-
 const User = mongoose.model('User', userSchema)
-
 module.exports = User;

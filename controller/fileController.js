@@ -138,7 +138,7 @@ const imageUpload = async (req, res) => {
     await tutor.save();
     console.log(formData);
     //  console.log(req.files);
-    res.status(201).json({ message: "Tutor registered successfully" });
+    res.send({ message: "Tutor registered successfully" });
   } catch (error) {
     console.error("Tutor registration error:", error);
     res.send({ error: "Internal server error" });
