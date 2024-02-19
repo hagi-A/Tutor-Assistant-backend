@@ -31,8 +31,8 @@ const quizRoutes = require("./routes/quizRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
 const searchRoute = require("./routes/searchRoute");
 const reportRoute = require("./routes/reportRoute");
+const childRoute = require("./routes/childRoute")
 const request = require("request");
-
 const io = require("socket.io")({
   cors: {
     origin: "http://localhost:3000",
@@ -161,6 +161,7 @@ app.use("/api/quizzes", quizRoutes);
 app.use("/api/assignment", assignmentRoutes);
 app.use("/api/search", searchRoute);
 app.use("/api/report", reportRoute);
+app.use("/api/child", childRoute)
 // app.use('/api/forgotPassword', passwordRoutes); // You can choose your route prefix
 app.post('/forgotPassword', (req, res) => {
   const { email } = req.body;
@@ -280,6 +281,8 @@ app.post("/tutorResetPassword/:id/:token", (req, res) => {
   });
 });
 app.use("/api/chat", chatRoutes);
+
+
 
 
 app.post("/api/accept-payment", (req, res) => {
